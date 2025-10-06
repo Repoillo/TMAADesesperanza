@@ -1,0 +1,98 @@
+/* --- Variables de Color y Fuentes --- */
+:root {
+    --morado-fondo: #2c003e;
+    --morado-tarjeta: #4a148c;
+    --naranja-acento: #ff6d00;
+    --blanco-hueso: #f5f5f5;
+    
+    --fuente-titulos: 'Creepster', cursive; /* Fuente temática para el título principal */
+    --fuente-cuerpo: 'Roboto', sans-serif;  /* Fuente legible para el resto del texto */
+}
+
+/* --- Estilos Globales --- */
+body {
+    margin: 0;
+    font-family: var(--fuente-cuerpo);
+    background-color: var(--morado-fondo);
+    color: var(--blanco-hueso);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- Header --- */
+header {
+    text-align: center;
+    padding: 20px 0;
+}
+
+header h1 {
+    font-family: var(--fuente-titulos);
+    font-size: 4rem;
+    color: var(--naranja-acento);
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 5px #000;
+}
+
+/* --- Grid de Productos --- */
+.productos-grid {
+    display: grid;
+    /* Creamos columnas responsivas: se ajustan solas al tamaño de la pantalla */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+/* --- Tarjeta de Producto --- */
+.producto-card {
+    background-color: var(--morado-tarjeta);
+    border: 2px solid var(--naranja-acento);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.producto-card:hover {
+    transform: translateY(-10px); /* Efecto de "flotar" al pasar el mouse */
+    box-shadow: 0 10px 20px var(--naranja-acento, 0.4);
+}
+
+.producto-card img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.producto-card h2 {
+    font-size: 1.8rem;
+    margin: 10px 0;
+    color: var(--naranja-acento);
+}
+
+.producto-card .precio {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--blanco-hueso);
+    margin-bottom: 15px;
+}
+
+/* --- Botón --- */
+.producto-card button {
+    background-color: var(--naranja-acento);
+    color: var(--blanco-hueso);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.producto-card button:hover {
+    background-color: #ff8c00; /* Un naranja un poco más claro */
+}
