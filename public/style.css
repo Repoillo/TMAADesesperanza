@@ -1,98 +1,100 @@
-/* --- Variables de Color y Fuentes --- */
 :root {
-    --morado-fondo: #2c003e;
-    --morado-tarjeta: #4a148c;
-    --naranja-acento: #ff6d00;
-    --blanco-hueso: #f5f5f5;
+    --crema-fondo: #fdfaf5;
+    --cafe-oscuro: #4a2c2a;
+    --cafe-medio: #a1662f;
+    --blanco: #ffffff;
+    --naranja-temporada: #ff6d00;
     
-    --fuente-titulos: 'Creepster', cursive; /* Fuente temática para el título principal */
-    --fuente-cuerpo: 'Roboto', sans-serif;  /* Fuente legible para el resto del texto */
+    --fuente-titulos: 'Playfair Display', serif;
+    --fuente-cuerpo: 'Poppins', sans-serif;
 }
 
-/* --- Estilos Globales --- */
 body {
     margin: 0;
     font-family: var(--fuente-cuerpo);
-    background-color: var(--morado-fondo);
-    color: var(--blanco-hueso);
+    background-color: var(--crema-fondo);
+    color: var(--cafe-oscuro);
 }
 
-.container {
+.productos {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* --- Header --- */
 header {
     text-align: center;
     padding: 20px 0;
+    border-bottom: 2px solid #e0dace;
 }
 
 header h1 {
     font-family: var(--fuente-titulos);
-    font-size: 4rem;
-    color: var(--naranja-acento);
-    letter-spacing: 5px;
-    text-shadow: 2px 2px 5px #000;
+    font-size: 3rem;
+    color: var(--cafe-oscuro);
 }
 
-/* --- Grid de Productos --- */
-.productos-grid {
+section h2 {
+    font-family: var(--fuente-titulos);
+    font-size: 2.2rem;
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
+.productou {
     display: grid;
-    /* Creamos columnas responsivas: se ajustan solas al tamaño de la pantalla */
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
+    min-height: 100px;
 }
 
-/* --- Tarjeta de Producto --- */
-.producto-card {
-    background-color: var(--morado-tarjeta);
-    border: 2px solid var(--naranja-acento);
-    border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.crud {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 2px solid #e0dace;
+    flex-wrap: wrap;
 }
 
-.producto-card:hover {
-    transform: translateY(-10px); /* Efecto de "flotar" al pasar el mouse */
-    box-shadow: 0 10px 20px var(--naranja-acento, 0.4);
-}
-
-.producto-card img {
-    max-width: 100%;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
-
-.producto-card h2 {
-    font-size: 1.8rem;
-    margin: 10px 0;
-    color: var(--naranja-acento);
-}
-
-.producto-card .precio {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--blanco-hueso);
-    margin-bottom: 15px;
-}
-
-/* --- Botón --- */
-.producto-card button {
-    background-color: var(--naranja-acento);
-    color: var(--blanco-hueso);
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
+.crudb {
+    font-family: var(--fuente-cuerpo);
+    font-weight: 600;
     font-size: 1rem;
-    font-weight: bold;
+    padding: 12px 25px;
+    border-radius: 50px;
+    border: 2px solid var(--cafe-oscuro);
+    background-color: var(--blanco);
+    color: var(--cafe-oscuro);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+}
+.pan {
+    background-color: var(--blanco);
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 }
 
-.producto-card button:hover {
-    background-color: #ff8c00; /* Un naranja un poco más claro */
+.pan img {
+    width: 100px;
+    height: 100px;
+    object-fit: auto;
+}
+
+.pan h3 {
+    font-size: 1.2rem;
+    margin: 15px 10px 10px 10px;
+    font-family: var(--fuente-cuerpo);
+    font-weight: 600;
+}
+
+.pan .precio {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--cafe-medio);
+    margin: 0;
+    padding-bottom: 20px;
 }

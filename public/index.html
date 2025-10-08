@@ -3,37 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TMAA Proyecto</title>
+    <title>TMAA Pan</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>💀 Panaderia la Desesperanza 💀</h1>
+        <h1>Panadería Desesperanza</h1>
     </header>
 
-    <main class="container">
-        <div class="productos-grid">
-            <div class="producto-card">
-                <h2>Pan de Muerto</h2>
-                <p class="precio">$45.00</p>
-                <p>Tradicional pan de temporada con azahar y naranja.</p>
-                <button>Agregar al Carrito</button>
-            </div>
+    <main class="productos">
+        <section>
+            <h2>Los normalitos</h2>
+            <div class="productou" id="pnormal">
 
-            <div class="producto-card">
-                <h2>Galleta de Calabaza</h2>
-                <p class="precio">$25.00</p>
-                <p>Galleta de mantequilla con forma de calabaza.</p>
-                <button>Agregar al Carrito</button>
             </div>
+        </section>
 
-            <div class="producto-card">
-                <h2>Muffin Fantasma</h2>
-                <p class="precio">$35.00</p>
-                <p>Muffin de chocolate con merengue en forma de fantasma.</p>
-                <button>Agregar al Carrito</button>
+        <section class="spookyjeje">
+            <h2>Halloween y Día de Muertos</h2>
+            <div class="productou" id="pspooky">
+
             </div>
+        </section>
+
+        <div class="crud">
+            <button id="agregarb" class="crudb">Agregar Pan</button>
+            <button id="editarb" class="crudb">Editar Pan</button>
+            <button id="eliminarb" class="crudb">Eliminar Pan</button>
         </div>
     </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/api/productos')
+            .then(res => {
+                // si la respuesta no es OK, mandamos un error
+                if (!res.ok) throw new Error('No se pudieron cargar los productos');
+                return res.json();
+            })
+            .then(data => {
+                // agarramos los dos contenedores por su ID
+                const contenedorNormal = document.getElementById('pnormal');
+                const contenedorSpooky = document.getElementById('pspooky');
+
+                // los limpiamos por si acaso
+                contenedorNormal.innerHTML = '';
+                contenedorSpooky.innerHTML = '';
+
+                // un forEach para recorrer todos los productos que llegaron de la base de datos
+                data.forEach(prod => {
+                    // Creamos un div para cada producto, aqui adentro ira su info
+                    const productoDiv = document.createElement('div');
+                    // le ponemos una clase para que el css le de estilo despues, si quieres
+                    productoDiv.className = 'pan'; 
+                    
+                    // Creamos los elementos para el imagen, nombre y precio
+                    if (prod.imagen_url) {
+                    const imagenPan = document.createElement('img');
+                    imagenPan.src = prod.imagen_url;
+                    productoDiv.appendChild(imagenPan);
+                    }
+                    const nombrePan = document.createElement('h3');
+                    nombrePan.textContent = prod.nombre;
+
+                    const precioPan = document.createElement('p');
+                    precioPan.className = 'precio'; // clase para darle un estilo diferente al precio
+                    precioPan.textContent = `$${prod.precio_venta}`;
+
+                    // Metemos el nombre, descripcion y precio dentro del div del producto
+                    productoDiv.appendChild(nombrePan);
+                    productoDiv.appendChild(precioPan);
+
+                    // === La lógica para separar los panes ===
+                    // si es_de_temporada es 1 (o sea, true), va para el contenedor spooky
+                    if (prod.es_de_temporada == 1) {
+                        contenedorSpooky.appendChild(productoDiv);
+                    } else {
+                        // si no, es un pan normalito y va para el otro contenedor
+                        contenedorNormal.appendChild(productoDiv);
+                    }
+                });
+            })
+            .catch(err => {
+                // si hay un error en cualquier parte, se muestra en la consola
+                console.error(err);
+                // y ponemos un mensaje de error en la pagina
+                document.querySelector('.productos').innerHTML = '<p>Error al cargar productos.</p>';
+            });
+    });
+</script>
 </body>
 </html>
