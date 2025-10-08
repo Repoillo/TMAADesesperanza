@@ -4,36 +4,30 @@
     --cafe-medio: #a1662f;
     --blanco: #ffffff;
     --naranja-temporada: #ff6d00;
-    
     --fuente-titulos: 'Playfair Display', serif;
     --fuente-cuerpo: 'Poppins', sans-serif;
 }
-
 body {
     margin: 0;
     font-family: var(--fuente-cuerpo);
     background-color: var(--crema-fondo);
     color: var(--cafe-oscuro);
 }
-
-.productos {
+.contenedor, .productos {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
-
 header {
     text-align: center;
     padding: 20px 0;
     border-bottom: 2px solid #e0dace;
 }
-
 header h1 {
     font-family: var(--fuente-titulos);
     font-size: 3rem;
     color: var(--cafe-oscuro);
 }
-
 section h2 {
     font-family: var(--fuente-titulos);
     font-size: 2.2rem;
@@ -41,24 +35,132 @@ section h2 {
     margin-top: 40px;
     margin-bottom: 20px;
 }
-
 .productou {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
     min-height: 100px;
 }
-
-.crud {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
+.pan {
+    background-color: var(--blanco);
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+.pan img {
+    width: 100px;
+    height: 100px;
+    object-fit: auto;
+}
+.pan h3 {
+    font-size: 1.2rem;
+    margin: 15px 10px 10px 10px;
+    font-family: var(--fuente-cuerpo);
+    font-weight: 600;
+}
+.pan .precio {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--cafe-medio);
+    margin: 0;
+    padding-bottom: 20px;
+}
+.gestion-link-contenedor {
+    text-align: center;
     margin-top: 50px;
     padding-top: 30px;
     border-top: 2px solid #e0dace;
-    flex-wrap: wrap;
 }
-
+.btn-gestion {
+    font-family: var(--fuente-cuerpo);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 15px 30px;
+    border-radius: 50px;
+    background-color: var(--cafe-oscuro);
+    color: var(--blanco);
+    text-decoration: none;
+}
+.agregar {
+    background-color: var(--blanco);
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
+}
+.campo {
+    margin-bottom: 20px;
+}
+.campo label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.campo input[type="text"],
+.campo input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+.formacciones {
+    display: flex;
+    gap: 10px;
+}
+.formacciones button {
+    padding: 12px 25px;
+    border-radius: 5px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+.bguardar {
+    background-color: var(--cafe-oscuro);
+    color: var(--blanco);
+    flex-grow: 1;
+    font-size: 1.1rem;
+}
+.blimpiar {
+    background-color: #eee;
+    color: #333;
+}
+.listasec {
+    margin-top: 50px;
+}
+.tablap {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.tablap th, .tablap td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+.tablap th {
+    background-color: #f2f2f2;
+}
+.tablap .acciones button {
+    margin-right: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+.volver {
+    text-align: center;
+    margin-top: 30px;
+}
 .crudb {
     font-family: var(--fuente-cuerpo);
     font-weight: 600;
@@ -69,32 +171,6 @@ section h2 {
     background-color: var(--blanco);
     color: var(--cafe-oscuro);
     cursor: pointer;
-}
-.pan {
-    background-color: var(--blanco);
-    text-align: center;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-}
-
-.pan img {
-    width: 100px;
-    height: 100px;
-    object-fit: auto;
-}
-
-.pan h3 {
-    font-size: 1.2rem;
-    margin: 15px 10px 10px 10px;
-    font-family: var(--fuente-cuerpo);
-    font-weight: 600;
-}
-
-.pan .precio {
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: var(--cafe-medio);
-    margin: 0;
-    padding-bottom: 20px;
+    text-decoration: none;
+    display: inline-block;
 }
