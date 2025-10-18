@@ -26,7 +26,6 @@ db.connect(err => {
 
 // === Rutas ===
 app.get('/api/productos', (req, res) => {
-  // La corrección está aquí: "Productos" con 'P' mayúscula
   const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM Productos';
   db.query(query, (err, results) => {
     if (err) {
@@ -37,7 +36,7 @@ app.get('/api/productos', (req, res) => {
   });
 });
 
-// CREAR un producto nuevo
+// CREAR un producto
 app.post('/api/productos', (req, res) => {
   const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
   const query = 'INSERT INTO Productos (nombre, precio_venta, es_de_temporada, imagen_url) VALUES (?, ?, ?, ?)';
@@ -51,7 +50,7 @@ app.post('/api/productos', (req, res) => {
   });
 });
 
-// ACTUALIZAR (Editar) un producto existente
+// ACTUALIZAR un producto
 app.put('/api/productos/:id', (req, res) => {
   const { id } = req.params;
   const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
