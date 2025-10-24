@@ -1,3 +1,3 @@
 #(credenciales)
 .env
-nodemodules
+node_modules
