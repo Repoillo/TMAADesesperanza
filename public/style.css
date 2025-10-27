@@ -15,7 +15,12 @@
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-
+.btn-logout {
+    background-color: #dc3545; /* Rojo */
+    color: var(--blanco);
+    border-color: #dc3545;
+    margin-left: 20px; /* Espacio opcional */
+}
 .contenedor-login h1 {
     text-align: center;
     margin-bottom: 30px;

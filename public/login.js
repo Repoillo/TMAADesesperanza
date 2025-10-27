@@ -2,39 +2,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('error-message');
 
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Evita que el formulario se envíe de la forma tradicional
+    // Referencias para el formulario de Registro (si lo usas en el mismo JS)
+    const registerForm = document.getElementById('register-form');
+    const registerErrorDiv = document.getElementById('reg-error-message'); // Asegúrate que este ID exista en tu HTML
 
-        errorMessageDiv.textContent = ''; // Limpia mensajes de error anteriores
+    // --- MANEJO DEL FORMULARIO DE LOGIN ---
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            errorMessageDiv.textContent = ''; // Limpia errores
 
-        const correo = document.getElementById('correo').value;
-        const contraseña = document.getElementById('contraseña').value;
+            const correo = document.getElementById('correo').value;
+            const contraseña = document.getElementById('contraseña').value;
 
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include', // Incluye cookies en la solicitud
-                body: JSON.stringify({ correo, contraseña }), // Envía los datos como JSON
-            });
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', // Para enviar cookies
+                    body: JSON.stringify({ correo, contraseña }),
+                });
 
-            if (response.ok) {
-                // Si la respuesta es exitosa (status 2xx)
-                const data = await response.json();
-                console.log(data.message); // Muestra "Login exitoso" en la consola
-                // Redirige al usuario al panel de administración
-                window.location.href = 'crud.html';
-            } else {
-                // Si la respuesta indica un error (status 4xx o 5xx)
-                const errorData = await response.json();
-                errorMessageDiv.textContent = errorData.error || 'Error al iniciar sesión';
+                if (response.ok) {
+                    window.location.href = 'principal.html'; // Redirige a principal
+                } else {
+                    const errorData = await response.json();
+                    errorMessageDiv.textContent = errorData.error || 'Error al iniciar sesión';
+                }
+            } catch (error) {
+                console.error('Error de red en login:', error);
+                errorMessageDiv.textContent = 'No se pudo conectar al servidor.';
             }
-        } catch (error) {
-            // Si hay un error de red (no se pudo conectar al servidor)
-            console.error('Error de red:', error);
-            errorMessageDiv.textContent = 'No se pudo conectar al servidor. Inténtalo más tarde.';
-        }
-    });
+        });
+    }
+
+    // --- MANEJO DEL FORMULARIO DE REGISTRO --- (ESTA PARTE FALTABA)
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if(registerErrorDiv) registerErrorDiv.textContent = ''; // Limpia errores
+
+            const correo = document.getElementById('reg-correo').value;
+            const contraseña = document.getElementById('reg-contraseña').value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // credentials: 'include', // No es estrictamente necesario aquí
+                    body: JSON.stringify({ correo, contraseña }),
+                });
+
+                if (response.ok) {
+                    registerForm.reset();
+                    alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                } else {
+                    const errorData = await response.json();
+                    if(registerErrorDiv) registerErrorDiv.textContent = errorData.error || 'Error al registrarse';
+                }
+            } catch (error) {
+                console.error('Error de red en registro:', error);
+                if(registerErrorDiv) registerErrorDiv.textContent = 'No se pudo conectar al servidor.';
+            }
+        });
+    }
 });
