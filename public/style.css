@@ -7,6 +7,31 @@
     --fuente-titulos: 'Playfair Display', serif;
     --fuente-cuerpo: 'Poppins', sans-serif;
 }
+.contenedor-login {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: var(--blanco);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.contenedor-login h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.error-login {
+    color: #dc3545; /* Rojo para errores */
+    margin-top: 15px;
+    text-align: center;
+    min-height: 1em; /* Para que ocupe espacio aunque esté vacío */
+}
+
+.enlace-registro {
+    text-align: center;
+    margin-top: 20px;
+}
 body {
     margin: 0;
     font-family: var(--fuente-cuerpo);

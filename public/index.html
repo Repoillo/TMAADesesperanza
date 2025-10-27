@@ -1,22 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio de sesión Desesperanza</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
 </head>
 <body>
-    <h1>Iniciar Sesión</h1>
-    <form action="/login" method="POST">
-        <div>
-            <label for="username">Usuario:</label>
-            <input type="text" id="username" name="username" required>
-        </div>
-        <div>
-            <label for="password">Contraseña:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Iniciar Sesión</button>
-    </form>
+    <div class="contenedor-login">
+        <h1>Iniciar Sesión</h1>
+        <form id="login-form">
+            <div class="campo">
+                <label for="correo">Correo Electrónico:</label>
+                <input type="email" id="correo" name="correo" required>
+            </div>
+            <div class="campo">
+                <label for="contraseña">Contraseña:</label>
+                <input type="password" id="contraseña" name="contraseña" required>
+            </div>
+            <button type="submit" class="bguardar">Iniciar Sesión</button>
+            <div id="error-message" class="error-login"></div>
+        </form>
+        <p class="enlace-registro">¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
+    </div>
+    <div class="contenderor-login">
+        <h1>Crear cuenta</h1>
+        <form id="register-form">
+            <div class="campo">
+                <label for="reg-correo">Correo Electrónico:</label>
+                <input type="email" id="reg-correo" name="reg-correo" required>
+            </div>
+            <div class="campo">
+                <label for="reg-contraseña">Contraseña:</label>
+                <input type="password" id="reg-contraseña" name="reg-contraseña" required>
+            </div>
+            <button type="submit" class="bguardar">Registrarse</button>
+            <div id="reg-error-message" class="error-login"></div>
+    </div>
+
+    <script src="login.js"></script>
 </body>
 </html>
