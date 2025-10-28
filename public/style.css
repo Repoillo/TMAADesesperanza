@@ -16,10 +16,10 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 .btn-logout {
-    background-color: #dc3545; /* Rojo */
+    background-color: #dc3545; 
     color: var(--blanco);
     border-color: #dc3545;
-    margin-left: 20px; /* Espacio opcional */
+    margin-left: 20px; 
 }
 .contenedor-login h1 {
     text-align: center;
@@ -27,10 +27,10 @@
 }
 
 .error-login {
-    color: #dc3545; /* Rojo para errores */
+    color: #dc3545;
     margin-top: 15px;
     text-align: center;
-    min-height: 1em; /* Para que ocupe espacio aunque esté vacío */
+    min-height: 1em;
 }
 
 .enlace-registro {

@@ -14,7 +14,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use(express.static('public'));
 
 if (!process.env.SESSION_SECRET) {
     console.error("¡ERROR GRAVE! La variable SESSION_SECRET no está definida en el archivo .env.");
@@ -26,9 +25,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: false,
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 // 1 hora
+        maxAge: 1000 * 60 * 60 
     }
 }));
 
@@ -50,13 +49,13 @@ db.connect(err => {
 // --- Ruta Raíz ---
 app.get('/', (req, res) => {
     if (req.session.userId) {
-        res.redirect('/public/principal.html');
+        res.redirect('/principal.html');
     } else {
         res.sendFile(__dirname + '/public/index.html');
     }
 });
 
-// --- RUTAS PÚBLICAS (Login y Registro) ---
+// --- RUTAS PÚBLICAS  ---
 app.post('/api/register', (req, res) => {
     const { correo, contraseña } = req.body;
     if (!correo || !contraseña) { /* ... validación ... */ }
@@ -94,7 +93,7 @@ app.post('/api/login', (req, res) => {
 app.post('/api/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) {
-            console.error('Error al cerrar sesión:', err); // Dejamos este por si falla el logout
+            console.error('Error al cerrar sesión:', err); 
             return res.status(500).json({ error: 'No se pudo cerrar sesión' });
         }
         res.clearCookie('connect.sid');
@@ -113,16 +112,13 @@ app.get('/api/check-auth', (req, res) => {
 // --- MIDDLEWARE DE AUTENTICACIÓN ---
 const isAuthenticated = (req, res, next) => {
     if (req.session.userId) {
-        next(); // Pasa si hay sesión
+        next(); 
     } else {
-        // Ya no muestra nada en consola si se deniega el acceso
         res.status(401).json({ error: 'No autorizado. Por favor, inicia sesión.' });
     }
 };
 
 // === RUTAS PROTEGIDAS (CRUD de Productos) ===
-// (GET, POST, PUT, DELETE para /api/productos usando isAuthenticated)
-// ... (El código de estas rutas sigue igual) ...
 app.get('/api/productos', isAuthenticated, (req, res) => {
     const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM Productos';
     db.query(query, (err, results) => {
@@ -162,8 +158,7 @@ app.delete('/api/productos/:id', isAuthenticated, (req, res) => {
         res.json({ message: 'Producto eliminado exitosamente' });
     });
 });
+app.use(express.static('public'));
 
-
-// --- Iniciar Servidor ---
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

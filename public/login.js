@@ -1,16 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     const errorMessageDiv = document.getElementById('error-message');
-
-    // Referencias para el formulario de Registro (si lo usas en el mismo JS)
     const registerForm = document.getElementById('register-form');
-    const registerErrorDiv = document.getElementById('reg-error-message'); // Asegúrate que este ID exista en tu HTML
+    const registerErrorDiv = document.getElementById('reg-error-message'); 
 
-    // --- MANEJO DEL FORMULARIO DE LOGIN ---
     if (loginForm) {
         loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            errorMessageDiv.textContent = ''; // Limpia errores
+            errorMessageDiv.textContent = ''; 
 
             const correo = document.getElementById('correo').value;
             const contraseña = document.getElementById('contraseña').value;
@@ -19,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', // Para enviar cookies
+                    credentials: 'include', 
                     body: JSON.stringify({ correo, contraseña }),
                 });
 
                 if (response.ok) {
-                    window.location.href = 'principal.html'; // Redirige a principal
+                    window.location.href = 'principal.html'; 
                 } else {
                     const errorData = await response.json();
                     errorMessageDiv.textContent = errorData.error || 'Error al iniciar sesión';
@@ -36,11 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- MANEJO DEL FORMULARIO DE REGISTRO --- (ESTA PARTE FALTABA)
     if (registerForm) {
         registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            if(registerErrorDiv) registerErrorDiv.textContent = ''; // Limpia errores
+            if(registerErrorDiv) registerErrorDiv.textContent = '';
 
             const correo = document.getElementById('reg-correo').value;
             const contraseña = document.getElementById('reg-contraseña').value;
@@ -49,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // credentials: 'include', // No es estrictamente necesario aquí
+                    credentials: 'include',
                     body: JSON.stringify({ correo, contraseña }),
                 });
 
