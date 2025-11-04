@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Carrito - Desesperanza</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
+    
+    <script src="carrito.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <h1>Panadería Desesperanza</h1>
+    </header>
+    <a href="carrito.html" class="btn-carrito-header" style="display: none;">
+            🛒 Carrito
+    </a>
+
+    <div class="carrito-container">
+        <h1>Tu Carrito de Compras</h1>
+        
+        <table id="tabla-carrito">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="carrito-body">
+                </tbody>
+        </table>
+
+        <div class="total-container">
+            <span class="total">Total: $<span id="carrito-total">0.00</span></span>
+        </div>
+
+        <button id="btn-realizar-pedido" class="btn-pedir">Realizar Pedido</button>
+        <button id="btn-vaciar-carrito" class="btn-vaciar">Vaciar Carrito</button>
+        <br>
+        <a href="principal.html" class="btn-seguir-comprando">Seguir Comprando</a>
+    </div>
+
+    <script>
+        const carritoBody = document.getElementById('carrito-body');
+        const carritoTotalEl = document.getElementById('carrito-total');
+        const btnPedir = document.getElementById('btn-realizar-pedido');
+        const btnVaciar = document.getElementById('btn-vaciar-carrito');
+
+        function renderizarTablaCarrito() {
+            const carrito = obtenerCarrito(); 
+            
+            carritoBody.innerHTML = '';
+            let totalGeneral = 0;
+
+            if (carrito.length === 0) {
+                carritoBody.innerHTML = '<tr><td colspan="5">Tu carrito está vacío.</td></tr>';
+                carritoTotalEl.textContent = '0.00';
+                btnPedir.disabled = true;
+                return;
+            }
+
+            carrito.forEach((item, index) => {
+                const subtotal = item.precio * item.cantidad;
+                totalGeneral += subtotal;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.nombre}</td>
+                    <td>$${item.precio.toFixed(2)}</td>
+                    <td>
+                        <input type="number" value="${item.cantidad}" min="1" data-index="${index}" class="input-cantidad">
+                    </td>
+                    <td>$${subtotal.toFixed(2)}</td>
+                    <td>
+                        <button class="btn-eliminar" data-index="${index}">Eliminar</button>
+                    </td>
+                `;
+                carritoBody.appendChild(tr);
+            });
+
+            carritoTotalEl.textContent = totalGeneral.toFixed(2);
+            btnPedir.disabled = false;
+        }
+
+        carritoBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('btn-eliminar')) {
+                const index = parseInt(e.target.dataset.index, 10);
+                eliminarItemDelCarrito(index); 
+                renderizarTablaCarrito();
+            }
+        });
+
+        carritoBody.addEventListener('change', (e) => {
+            if (e.target.classList.contains('input-cantidad')) {
+                const index = parseInt(e.target.dataset.index, 10);
+                const nuevaCantidad = parseInt(e.target.value, 10);
+                
+                actualizarCantidadItem(index, nuevaCantidad);
+                renderizarTablaCarrito();
+            }
+        });
+
+        btnVaciar.addEventListener('click', () => {
+            if (confirm('¿Seguro que deseas vaciar el carrito?')) {
+                guardarCarrito([]); 
+                renderizarTablaCarrito();
+            }
+        });
+
+        btnPedir.addEventListener('click', async () => {
+            
+            const carrito = obtenerCarrito();
+            if (carrito.length === 0) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+
+            const totalPedido = parseFloat(carritoTotalEl.textContent);
+            
+            const datosPedido = {
+                total_pedido: totalPedido,
+                estado_pedido: 'pendiente', 
+                detalle_items: carrito 
+            };
+
+            console.log("Enviando al backend:", JSON.stringify(datosPedido));
+            
+            try {
+                const response = await fetch('/api/pedidos/crear', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', 
+                    body: JSON.stringify(datosPedido)
+                });
+
+                if (response.ok) {
+                    const resultado = await response.json();
+                    alert('¡Pedido realizado con éxito! ID del pedido: ' + resultado.id_pedido);
+                    
+                    guardarCarrito([]);
+                    renderizarTablaCarrito();
+                } else {
+                    const error = await response.json();
+                    if (response.status === 401) {
+                        alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('Error al realizar el pedido: ' + error.message);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error de red o conexión:', error);
+                alert('No se pudo conectar con el servidor para realizar el pedido.');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', renderizarTablaCarrito);
+
+    </script>
+</body>
+</html>

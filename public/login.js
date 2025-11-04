@@ -20,11 +20,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ correo, contraseña }),
                 });
 
+                const data = await response.json();
+
                 if (response.ok) {
-                    window.location.href = 'principal.html'; 
+                    if (data.rol === 'admin') {
+                        window.location.href = 'crud.html';
+                    } else {
+                        window.location.href = 'principal.html';
+                    }
                 } else {
-                    const errorData = await response.json();
-                    errorMessageDiv.textContent = errorData.error || 'Error al iniciar sesión';
+                    errorMessageDiv.textContent = data.error || 'Error al iniciar sesión';
                 }
             } catch (error) {
                 console.error('Error de red en login:', error);
@@ -38,6 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             if(registerErrorDiv) registerErrorDiv.textContent = '';
 
+            const nombre = document.getElementById('reg-nombre').value;
+            const apellido = document.getElementById('reg-apellido').value;
             const correo = document.getElementById('reg-correo').value;
             const contraseña = document.getElementById('reg-contraseña').value;
 
@@ -46,12 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ correo, contraseña }),
+                    body: JSON.stringify({ nombre, apellido, correo, contraseña }),
                 });
 
                 if (response.ok) {
                     registerForm.reset();
-                    alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                    alert('¡Registro de cliente exitoso! Ahora puedes iniciar sesión.');
+                    window.location.href = 'index.html'; 
                 } else {
                     const errorData = await response.json();
                     if(registerErrorDiv) registerErrorDiv.textContent = errorData.error || 'Error al registrarse';

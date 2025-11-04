@@ -6,32 +6,40 @@
     <title>TMAA Pan</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
+    <script src="carrito.js" defer></script>
 </head>
 <body>
     <header>
-        <h1>Panadería Desesperanza</h1> <a href="crud.html" class="crudb">CRUD ⚙</a>
+        <h1>Panadería Desesperanza</h1> 
     </header>
-
+    <a href="carrito.html" class="btn-carrito-header">
+            🛒 Carrito
+    </a>
     <main class="productos">
         <section>
             <h2>Los normalitos</h2>
             <div class="productou" id="pnormal">
-
             </div>
         </section>
-
         <section class="spookyjeje">
             <h2>Halloween y Día de Muertos</h2>
             <div class="productou" id="pspooky">
-
             </div>
         </section>
+        <button id="logout-btn" class="crudb btn-logout">Cerrar Sesión</button>
     </main>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        fetch('/api/productos')
+        const logoutButton = document.getElementById('logout-btn');
+        fetch('/api/productos-tienda', { credentials: 'include' }) 
             .then(res => {
-                if (!res.ok) throw new Error('No se pudieron cargar los productos');
+                if (!res.ok) {
+                    if (res.status === 401) {
+                         window.location.href = 'index.html';
+                         return;
+                    }
+                    throw new Error('No se pudieron cargar los productos');
+                }
                 return res.json();
             })
             .then(data => {
@@ -46,19 +54,33 @@
                     productoDiv.className = 'pan'; 
                     
                     if (prod.imagen_url) {
-                    const imagenPan = document.createElement('img');
-                    imagenPan.src = prod.imagen_url;
-                    productoDiv.appendChild(imagenPan);
+                        const imagenPan = document.createElement('img');
+                        imagenPan.src = prod.imagen_url;
+                        productoDiv.appendChild(imagenPan);
                     }
                     const nombrePan = document.createElement('h3');
                     nombrePan.textContent = prod.nombre;
 
                     const precioPan = document.createElement('p');
                     precioPan.className = 'precio'; 
-                    precioPan.textContent = `$${prod.precio_venta}`;
+                    precioPan.textContent = `$${parseFloat(prod.precio_venta).toFixed(2)}`;
 
                     productoDiv.appendChild(nombrePan);
                     productoDiv.appendChild(precioPan);
+
+                    const botonAñadir = document.createElement('button');
+                    botonAñadir.className = 'btn-add-cart';
+                    botonAñadir.textContent = 'Añadir al carrito';
+                    
+                    botonAñadir.onclick = () => {
+                        agregarAlCarrito(
+                            prod.id_producto,
+                            prod.nombre,
+                            prod.precio_venta
+                        );
+                    };
+                    
+                    productoDiv.appendChild(botonAñadir);
 
                     if (prod.es_de_temporada == 1) {
                         contenedorSpooky.appendChild(productoDiv);
@@ -71,6 +93,20 @@
                 console.error(err);
                 document.querySelector('.productos').innerHTML = '<p>Error al cargar productos.</p>';
             });
+            if (logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include' 
+                });
+                if (response.ok) {
+                    window.location.href = 'index.html'; 
+                } else { /* ... manejo de error logout ... */ }
+            } catch (error) { /* ... manejo error red logout ... */ }
+        });
+    }
     });
 </script>
 </body>

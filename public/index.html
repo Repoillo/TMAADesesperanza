@@ -23,9 +23,18 @@
             <div id="error-message" class="error-login"></div>
         </form>
     </div>
+
     <div class="contenedor-login">
-        <h1>Crear cuenta</h1>
+        <h1>Crear cuenta (Cliente)</h1>
         <form id="register-form">
+            <div class="campo">
+                <label for="reg-nombre">Nombre:</label>
+                <input type="text" id="reg-nombre" name="reg-nombre" required>
+            </div>
+            <div class="campo">
+                <label for="reg-apellido">Apellido:</label>
+                <input type="text" id="reg-apellido" name="reg-apellido" required>
+            </div>
             <div class="campo">
                 <label for="reg-correo">Correo Electrónico:</label>
                 <input type="email" id="reg-correo" name="reg-correo" required>
@@ -36,7 +45,8 @@
             </div>
             <button type="submit" class="bguardar">Registrarse</button>
             <div id="reg-error-message" class="error-login"></div>
-    </div>
+        </div>
+    </form>
 
     <script src="login.js"></script>
 </body>
