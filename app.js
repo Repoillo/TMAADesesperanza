@@ -167,7 +167,7 @@ const esCliente = (req, res, next) => {
 };
 
 app.get('/api/productos', esAdmin, async (req, res) => {
-    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM Productos';
+    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos';
     try {
         const [results] = await db.query(query);
         res.json(results);
@@ -179,7 +179,7 @@ app.get('/api/productos', esAdmin, async (req, res) => {
 app.post('/api/productos', esAdmin, async (req, res) => { 
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
     if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
-    const query = 'INSERT INTO Productos (nombre, precio_venta, es_de_temporada, imagen_url) VALUES (?, ?, ?, ?)';
+    const query = 'INSERT INTO productos (nombre, precio_venta, es_de_temporada, imagen_url) VALUES (?, ?, ?, ?)';
     db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null], (err, result) => {
         if (err) { /* ... manejo error db ... */ }
         res.status(201).json({ id: result.insertId, message: 'Producto creado exitosamente' });
@@ -189,7 +189,7 @@ app.put('/api/productos/:id', esAdmin, async (req, res) => {
     const { id } = req.params;
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
     if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
-    const query = 'UPDATE Productos SET nombre = ?, precio_venta = ?, es_de_temporada = ?, imagen_url = ? WHERE id_producto = ?';
+    const query = 'UPDATE productos SET nombre = ?, precio_venta = ?, es_de_temporada = ?, imagen_url = ? WHERE id_producto = ?';
     db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null, id], (err, result) => {
         if (err) { /* ... manejo error db ... */ }
         if (result.affectedRows === 0) { /* ... no encontrado ... */ }
@@ -198,7 +198,7 @@ app.put('/api/productos/:id', esAdmin, async (req, res) => {
  });
 app.delete('/api/productos/:id', esAdmin, async (req, res) => { 
     const { id } = req.params;
-    const query = 'DELETE FROM Productos WHERE id_producto = ?';
+    const query = 'DELETE FROM productos WHERE id_producto = ?';
     db.query(query, [id], (err, result) => {
         if (err) { /* ... manejo error db ... */ }
         if (result.affectedRows === 0) { /* ... no encontrado ... */ }
@@ -208,7 +208,7 @@ app.delete('/api/productos/:id', esAdmin, async (req, res) => {
 
 
 app.get('/api/productos-tienda', esCliente, async (req, res) => {
-    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM Productos';
+    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos';
     try {
         const [results] = await db.query(query);
         res.json(results);
