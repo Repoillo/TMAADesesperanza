@@ -176,35 +176,74 @@ app.get('/api/productos', esAdmin, async (req, res) => {
         res.status(500).json({ error: 'Error al obtener productos' });
     }
 });
+
 app.post('/api/productos', esAdmin, async (req, res) => { 
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
-    if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
+    if (!nombre || precio_venta === undefined) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos' });
+    }
+    
     const query = 'INSERT INTO productos (nombre, precio_venta, es_de_temporada, imagen_url) VALUES (?, ?, ?, ?)';
-    db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
+    
+    try {
+        const [result] = await db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null]);
         res.status(201).json({ id: result.insertId, message: 'Producto creado exitosamente' });
-    });
+    } catch (err) {
+        console.error('Error al crear producto:', err);
+        res.status(500).json({ error: 'Error al crear el producto' });
+    }
  });
+
 app.put('/api/productos/:id', esAdmin, async (req, res) => { 
     const { id } = req.params;
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
-    if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
+    if (!nombre || precio_venta === undefined) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos' });
+    }
+
     const query = 'UPDATE productos SET nombre = ?, precio_venta = ?, es_de_temporada = ?, imagen_url = ? WHERE id_producto = ?';
-    db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null, id], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
-        if (result.affectedRows === 0) { /* ... no encontrado ... */ }
+    
+    try {
+        const [result] = await db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null, id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
         res.json({ message: 'Producto actualizado exitosamente' });
-    });
+    } catch (err) {
+         console.error('Error al actualizar producto:', err);
+         res.status(500).json({ error: 'Error al actualizar el producto' });
+    }
  });
+
 app.delete('/api/productos/:id', esAdmin, async (req, res) => { 
     const { id } = req.params;
     const query = 'DELETE FROM productos WHERE id_producto = ?';
-    db.query(query, [id], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
-        if (result.affectedRows === 0) { /* ... no encontrado ... */ }
+    
+    try {
+        const [result] = await db.query(query, [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
         res.json({ message: 'Producto eliminado exitosamente' });
-    });
+    } catch (err) {
+         console.error('Error al eliminar producto:', err);
+         res.status(500).json({ error: 'Error al eliminar el producto' });
+    }
  });
+
+app.get('/api/productos-tienda', esCliente, async (req, res) => {
+    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos';
+    try {
+        const [results] = await db.query(query);
+        res.json(results);
+    } catch (err) {
+        console.error('Error al obtener productos (cliente):', err);
+        res.status(500).json({ error: 'Error al obtener productos' });
+    }
+});
+
 
 
 app.get('/api/productos-tienda', esCliente, async (req, res) => {
