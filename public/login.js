@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessageDiv = document.getElementById('error-message');
     const registerForm = document.getElementById('register-form');
     const registerErrorDiv = document.getElementById('reg-error-message'); 
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (loginForm) {
         loginForm.addEventListener('submit', async (event) => {
@@ -11,6 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const correo = document.getElementById('correo').value;
             const contraseña = document.getElementById('contraseña').value;
+
+            if (!emailRegex.test(correo)) {
+                errorMessageDiv.textContent = 'Por favor, introduce un correo válido.';
+                return;
+            }
+            if (!contraseña) {
+                 errorMessageDiv.textContent = 'Por favor, introduce una contraseña.';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/login', {
@@ -47,6 +58,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const apellido = document.getElementById('reg-apellido').value;
             const correo = document.getElementById('reg-correo').value;
             const contraseña = document.getElementById('reg-contraseña').value;
+
+            if (!nombre.trim() || !apellido.trim()) {
+                if(registerErrorDiv) registerErrorDiv.textContent = 'Nombre y apellido son requeridos.';
+                return;
+            }
+            if (!emailRegex.test(correo)) {
+                if(registerErrorDiv) registerErrorDiv.textContent = 'Por favor, introduce un correo válido.';
+                return;
+            }
+            if (contraseña.length < 6) { 
+                if(registerErrorDiv) registerErrorDiv.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/register', {

@@ -28,16 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tablabody.innerHTML = '';
             productos.forEach(p => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td>${p.nombre}</td>
-                    <td>$${p.precio_venta}</td>
-                    <td class="acciones">
-                        <button class="beditar" data-id="${p.id_producto}">Editar</button>
-                        <button class="beliminar" data-id="${p.id_producto}">Eliminar</button>
-                    </td>
-                `;
-                tablabody.appendChild(fila);
+                // ¡IMPORTANTE! Esto oculta los productos desactivados ("eliminados")
+                if (p.esta_activo !== 0) { 
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${p.nombre}</td>
+                        <td>$${p.precio_venta}</td>
+                        <td class="acciones">
+                            <button class="beditar" data-id="${p.id_producto}">Editar</button>
+                            <button class="beliminar" data-id="${p.id_producto}">Eliminar</button>
+                        </td>
+                    `;
+                    tablabody.appendChild(fila);
+                }
             });
         } catch (error) {
             console.error('Error al cargar:', error);
@@ -66,14 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (e.target.classList.contains('beliminar')) {
             const id = e.target.dataset.id;
-            if (confirm('¿Seguro que quieres eliminar este producto?')) {
+            if (confirm('¿Seguro que quieres eliminar (desactivar) este producto?')) {
                 fetch(`${API_URL}/${id}`, { method: 'DELETE', credentials: 'include' })
                     .then(res => {
                         if (!res.ok) {
                             if (res.status === 401) window.location.href = 'index.html';
                             throw new Error('Error al eliminar');
                         }
-                        cargarProductos();
+                        return res.json(); 
+                    })
+                    .then(data => {
+                        console.log(data.message); // Muestra "Producto desactivado exitosamente"
+                        cargarProductos(); // Recarga la tabla
                     })
                     .catch(error => console.error(error));
             }
@@ -82,14 +89,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const id = pidInput.value;
+        const nombre = nombreInput.value;
+        const precio = parseFloat(precioInput.value);
+
+        // --- Validación de Formulario (Cliente) ---
+        if (!nombre.trim()) {
+            alert('El nombre del producto no puede estar vacío.');
+            return;
+        }
+        if (isNaN(precio) || precio <= 0) {
+            alert('El precio debe ser un número positivo válido.');
+            return;
+        }
+        // --- Fin Validación ---
+
         const esActualizacion = id !== '';
         const url = esActualizacion ? `${API_URL}/${id}` : API_URL;
         const metodo = esActualizacion ? 'PUT' : 'POST';
 
         const datos = {
-            nombre: nombreInput.value,
-            precio_venta: precioInput.value,
+            nombre: nombre.trim(),
+            precio_venta: precio, 
             imagen_url: imagenUrlInput.value,
             es_de_temporada: esTemporadaCheckbox.checked ? 1 : 0
         };
@@ -125,8 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (response.ok) {
                     window.location.href = 'index.html'; 
-                } else { /* ... manejo de error logout ... */ }
-            } catch (error) { /* ... manejo error red logout ... */ }
+                } else { 
+                    alert('No se pudo cerrar sesión');
+                }
+            } catch (error) { 
+                console.error('Error de red al cerrar sesión:', error);
+            }
         });
     }
 
@@ -134,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/api/check-auth', { credentials: 'include' });
             const data = await response.json();
-            if (!data.loggedIn) {
+            if (!data.loggedIn || data.rol !== 'admin') { 
                 window.location.href = 'index.html'; 
             } else {
                 cargarProductos(); 

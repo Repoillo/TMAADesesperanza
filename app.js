@@ -4,7 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 require('dotenv').config();
-
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const app = express();
 const saltRounds = 10;
 
@@ -59,9 +59,24 @@ app.get('/', (req, res) => {
 
 app.post('/api/register', async (req, res) => {
     const { nombre, apellido, correo, contraseña } = req.body;
-    
     if (!nombre || !apellido || !correo || !contraseña) {
         return res.status(400).json({ error: 'Todos los campos son requeridos.' });
+    }
+    
+    if (typeof nombre !== 'string' || !nombre.trim()) {
+        return res.status(400).json({ error: 'Nombre inválido.' });
+    }
+    
+    if (typeof apellido !== 'string' || !apellido.trim()) {
+        return res.status(400).json({ error: 'Apellido inválido.' });
+    }
+
+    if (!emailRegex.test(correo)) {
+        return res.status(400).json({ error: 'Formato de correo inválido.' });
+    }
+
+    if (typeof contraseña !== 'string' || contraseña.length < 6) {
+        return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
     }
 
     let connection;
@@ -76,7 +91,7 @@ app.post('/api/register', async (req, res) => {
         const nuevoUsuarioId = resultUsuario.insertId;
 
         const sqlCliente = 'INSERT INTO clientes (id_cliente, nombre, apellido, email) VALUES (?, ?, ?, ?)';
-        await connection.query(sqlCliente, [nuevoUsuarioId, nombre, apellido, correo]);
+        await connection.query(sqlCliente, [nuevoUsuarioId, nombre.trim(), apellido.trim(), correo]);
 
         await connection.commit();
         
@@ -167,7 +182,7 @@ const esCliente = (req, res, next) => {
 };
 
 app.get('/api/productos', esAdmin, async (req, res) => {
-    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos';
+    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos WHERE esta_activo = 1';
     try {
         const [results] = await db.query(query);
         res.json(results);
@@ -176,39 +191,77 @@ app.get('/api/productos', esAdmin, async (req, res) => {
         res.status(500).json({ error: 'Error al obtener productos' });
     }
 });
+
 app.post('/api/productos', esAdmin, async (req, res) => { 
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
-    if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
+    
+    const precioNum = parseFloat(precio_venta);
+
+    if (!nombre || !nombre.trim() || precio_venta === undefined) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos.' });
+    }
+    if (isNaN(precioNum) || precioNum <= 0) {
+        return res.status(400).json({ error: 'El precio debe ser un número positivo válido.' });
+    }
     const query = 'INSERT INTO productos (nombre, precio_venta, es_de_temporada, imagen_url) VALUES (?, ?, ?, ?)';
-    db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
+    try {
+        const [result] = await db.query(query, [nombre.trim(), precioNum, es_de_temporada ? 1 : 0, imagen_url || null]);
         res.status(201).json({ id: result.insertId, message: 'Producto creado exitosamente' });
-    });
+    } catch (err) {
+        console.error('Error al crear producto:', err);
+        res.status(500).json({ error: 'Error al crear el producto' });
+    }
  });
+
 app.put('/api/productos/:id', esAdmin, async (req, res) => { 
     const { id } = req.params;
     const { nombre, precio_venta, es_de_temporada, imagen_url } = req.body;
-    if (!nombre || precio_venta === undefined) { /* ... validación ... */ }
+
+    const precioNum = parseFloat(precio_venta);
+    if (!nombre || !nombre.trim() || precio_venta === undefined) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos.' });
+    }
+    if (isNaN(precioNum) || precioNum <= 0) {
+        return res.status(400).json({ error: 'El precio debe ser un número positivo válido.' });
+    }
+
     const query = 'UPDATE productos SET nombre = ?, precio_venta = ?, es_de_temporada = ?, imagen_url = ? WHERE id_producto = ?';
-    db.query(query, [nombre, precio_venta, es_de_temporada ? 1 : 0, imagen_url || null, id], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
-        if (result.affectedRows === 0) { /* ... no encontrado ... */ }
+    
+    try {
+        const [result] = await db.query(query, [nombre.trim(), precioNum, es_de_temporada ? 1 : 0, imagen_url || null, id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
         res.json({ message: 'Producto actualizado exitosamente' });
-    });
+
+    } catch (err) {
+         console.error('Error al actualizar producto:', err);
+         res.status(500).json({ error: 'Error al actualizar el producto' });
+    }
  });
+
 app.delete('/api/productos/:id', esAdmin, async (req, res) => { 
     const { id } = req.params;
-    const query = 'DELETE FROM productos WHERE id_producto = ?';
-    db.query(query, [id], (err, result) => {
-        if (err) { /* ... manejo error db ... */ }
-        if (result.affectedRows === 0) { /* ... no encontrado ... */ }
-        res.json({ message: 'Producto eliminado exitosamente' });
-    });
+    const query = 'UPDATE productos SET esta_activo = 0 WHERE id_producto = ?';
+    
+    try {
+        const [result] = await db.query(query, [id]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        res.json({ message: 'Producto desactivado exitosamente' }); 
+
+    } catch (err) {
+         console.error('Error al desactivar producto:', err);
+         res.status(500).json({ error: 'Error al desactivar el producto' });
+    }
  });
 
 
 app.get('/api/productos-tienda', esCliente, async (req, res) => {
-    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos';
+    const query = 'SELECT id_producto, nombre, precio_venta, es_de_temporada, imagen_url FROM productos WHERE esta_activo = 1';
     try {
         const [results] = await db.query(query);
         res.json(results);
