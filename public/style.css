@@ -67,9 +67,10 @@ section h2 {
 }
 .productou {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
     gap: 30px;
     min-height: 100px;
+    justify-items: center; 
 }
 .pan {
     background-color: var(--blanco);
@@ -80,11 +81,15 @@ section h2 {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    
+    max-width: 350px; 
+    width: 100%; 
 }
+
 .pan img {
     width: 100%;
     height: 200px;
-    object-fit: auto;
+    object-fit: cover; 
 }
 .pan h3 {
     font-size: 1.2rem;
@@ -210,6 +215,11 @@ section h2 {
 
 
 .btn-carrito-header {
+    position: static; 
+    transform: none;
+    left: auto;
+    margin: 0;
+    
     font-family: var(--fuente-cuerpo);
     font-weight: 600;
     font-size: 1rem;
@@ -219,10 +229,6 @@ section h2 {
     color: var(--blanco);
     text-decoration: none;
     display: inline-block;
-    margin: 20px auto;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
 }
 .btn-carrito-header:hover {
     background-color: var(--cafe-oscuro);
@@ -240,8 +246,8 @@ section h2 {
     cursor: pointer;
     transition: background-color 0.3s;
 }
-.btn-add-cart:hover {
-    background-color: var(--cafe-medio);
+.btn-carrito-header:hover {
+    background-color: var(--cafe-oscuro);
 }
 
 .carrito-container {
@@ -328,3 +334,213 @@ section h2 {
     border: 2px solid var(--cafe-oscuro);
 }
 
+#map {
+    height: 400px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--cafe-medio);
+    z-index: 1;
+}
+
+.leaflet-container {
+    font-family: var(--fuente-cuerpo);
+}
+/* --- ESTILOS DE LA CARTERA Y MODALES --- */
+.btn-cartera {
+    background-color: var(--naranja-temporada);
+    color: var(--blanco);
+    padding: 10px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    margin-left: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+.btn-cartera:hover {
+    transform: scale(1.05);
+    background-color: #e65100;
+}
+
+/* El fondo oscuro detrás del modal */
+.modal-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* La cajita del modal */
+.modal-content {
+    background-color: var(--blanco);
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-content h2 {
+    font-family: var(--fuente-titulos);
+    color: var(--cafe-oscuro);
+    margin-bottom: 20px;
+}
+
+.saldo-grande {
+    font-size: 2.5rem;
+    color: var(--naranja-temporada);
+    font-weight: bold;
+    margin: 20px 0;
+    display: block;
+}
+
+.input-dinero {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.btn-depositar {
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.btn-cerrar-modal {
+    margin-top: 15px;
+    background: none;
+    border: none;
+    color: #666;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Estilos para el Ticket Visual */
+.ticket-container {
+    text-align: left;
+    background: #fdfaf5;
+    padding: 20px;
+    border: 1px dashed #a1662f;
+    margin-top: 10px;
+    font-family: 'Courier New', monospace;
+}
+.acciones-header {
+    display: flex;             
+    justify-content: center;  
+    align-items: center;        
+    gap: 20px;               
+    margin: 20px 0;           
+}
+/* --- ESTILOS DEL TICKET (RECIBO) --- */
+.ticket-contenido {
+    background-color: #fff;
+    padding: 20px;
+    width: 100%;
+    max-width: 350px; /* Ancho típico de ticket */
+    margin: 0 auto;
+    font-family: 'Courier New', Courier, monospace; /* Fuente monoespaciada */
+    color: #000;
+    text-align: left;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.ticket-header {
+    text-align: center;
+    border-bottom: 2px dashed #000;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+.ticket-header h3 {
+    margin: 5px 0;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+
+.ticket-info {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+.ticket-info p {
+    margin: 3px 0;
+}
+
+.ticket-items {
+    border-bottom: 2px dashed #000;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+.ticket-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.ticket-total {
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 10px;
+    border-top: 2px dashed #000;
+    padding-top: 10px;
+}
+
+.btn-imprimir {
+    background-color: var(--cafe-oscuro);
+    color: white;
+    margin-top: 20px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+.btn-imprimir:hover {
+    background-color: var(--cafe-medio);
+}
+
+.scroll-container {
+    max-height: 500px; 
+    overflow-y: auto;  
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.tarjeta-pedido {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.tarjeta-pedido:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15) !important;
+    border-left: 5px solid var(--naranja-temporada);
+}

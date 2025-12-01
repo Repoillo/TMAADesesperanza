@@ -6,13 +6,35 @@
     <title>CRUD Desesperanza</title>
     <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
         <h1>Panel de Administración</h1>
     </header>
-
     <main class="contenedor">
+        <section class="estadisticas" style="max-width: 600px; margin: 0 auto 40px auto; text-align: center;">
+        <h2>Top Panes Más Vendidos</h2>
+        <div style="position: relative; height: 300px; width: 100%;">
+            <canvas id="graficaVentas"></canvas>
+        </div>
+        </section>
+        <section class="historial-admin" style="margin-top: 40px; border-top: 2px solid #e0dace; padding-top: 20px;">
+            <h2>Historial Global de Ventas</h2>
+            <table class="tablap" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-ventas-body">
+                    </tbody>
+            </table>
+        </section>
         <section class="agregar">
             <h2 id="formtitulo">Agregar Producto</h2>
             <form id="formulario">
@@ -54,6 +76,8 @@
                 </tbody>
             </table>
         </section>
+        <br>
+        <br>
         <button id="logout-btn" class="crudb btn-logout">Cerrar Sesión</button>
     </main>
 

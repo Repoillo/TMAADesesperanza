@@ -13,9 +13,19 @@
     <header>
         <h1>Panadería Desesperanza 💀💀</h1> 
     </header>
-    <a href="carrito.html" class="btn-carrito-header">
+
+    <div class="acciones-header">
+        <a href="historial.html" class="btn-carrito-header" style="background-color: var(--cafe-oscuro);">
+            Mis Pedidos
+        </a>
+        <a href="carrito.html" class="btn-carrito-header">
             🛒 Carrito
-    </a>
+        </a>
+        
+        <button onclick="abrirModalCartera()" class="btn-cartera">
+             Saldo: $<span id="saldo-header">...</span>
+        </button>
+    </div>
     <main class="productos">
         <section>
             <h2>Los normalitos</h2>
@@ -23,11 +33,29 @@
             </div>
         </section>
         <section class="spookyjeje">
-            <h2>Halloween y Día de Muertos</h2>
+            <h2>Temporada</h2>
             <div class="productou" id="pspooky">
             </div>
         </section>
+        <br>
+        <br>
+        
         <button id="logout-btn" class="crudb btn-logout">Cerrar Sesión de cliente</button>
+        <div id="modal-cartera" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Mi Billetera</h2>
+                <p>Saldo Disponible:</p>
+                <span class="saldo-grande">$<span id="saldo-modal">0.00</span></span>
+
+                <p>Agregar fondos:</p>
+                <input type="number" id="monto-deposito" class="input-dinero" placeholder="Ej. 500.00" min="1">
+
+                <button onclick="depositarDinero()" class="btn-depositar">Depositar</button>
+                <button onclick="cerrarModalCartera()" class="btn-cerrar-modal">Cancelar</button>
+            </div>
+        </div>
+
+        <script src="cartera.js"></script>
     </main>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -94,7 +122,7 @@
                 console.error(err);
                 document.querySelector('.productos').innerHTML = '<p>Error al cargar productos.</p>';
             });
-            if (logoutButton) {
+    if (logoutButton) {
         logoutButton.addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/logout', {
@@ -102,13 +130,21 @@
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include' 
                 });
+
                 if (response.ok) {
                     window.location.href = 'index.html'; 
-                } else { /* ... manejo de error logout ... */ }
-            } catch (error) { /* ... manejo error red logout ... */ }
+                } else {
+                    console.error('Error al cerrar sesión:', await response.text());
+                    alert('No se pudo cerrar la sesión correctamente.');
+                }
+            } catch (error) {
+                console.error('Error de red al cerrar sesión:', error);
+                alert('Error de conexión. No se pudo contactar con el servidor.');
+            }
         });
     }
     });
+    
 </script>
 </body>
 </html>

@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Carrito - Desesperanza</title>
     
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
     
@@ -14,10 +21,10 @@
 
     <header>
         <h1>Panadería Desesperanza</h1>
+        <button onclick="abrirModalCartera()" class="btn-cartera" style="position: absolute; top: 30px; right: 20px;">
+              $<span id="saldo-header">...</span>
+        </button>
     </header>
-    <a href="carrito.html" class="btn-carrito-header" style="display: none;">
-            🛒 Carrito
-    </a>
 
     <div class="carrito-container">
         <h1>Tu Carrito de Compras</h1>
@@ -32,12 +39,19 @@
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="carrito-body">
-                </tbody>
+            <tbody id="carrito-body"></tbody>
         </table>
 
         <div class="total-container">
             <span class="total">Total: $<span id="carrito-total">0.00</span></span>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3>📍 Selecciona la ubicación de entrega:</h3>
+            <p style="font-size: 0.9em; color: #666;">Haz clic en el mapa o arrastra el marcador para definir dónde recibirás tu pan.</p>
+            <div id="map"></div>
+            <input type="hidden" id="latitud">
+            <input type="hidden" id="longitud">
         </div>
 
         <button id="btn-realizar-pedido" class="btn-pedir">Realizar Pedido</button>
@@ -46,15 +60,80 @@
         <a href="principal.html" class="btn-seguir-comprando">Seguir Comprando</a>
     </div>
 
+    <div id="modal-cartera" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Mi Billetera</h2>
+            <p>Saldo Disponible:</p>
+            <span class="saldo-grande">$<span id="saldo-modal">0.00</span></span>
+            <p>Agregar fondos:</p>
+            <input type="number" id="monto-deposito" class="input-dinero" placeholder="Ej. 500.00" min="1">
+            <button onclick="depositarDinero()" class="btn-depositar">Depositar</button>
+            <button onclick="cerrarModalCartera()" class="btn-cerrar-modal">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="modal-ticket" class="modal-overlay">
+        <div class="modal-content" style="background: transparent; box-shadow: none;">
+            <div id="area-impresion" class="ticket-contenido">
+                <div class="ticket-header">
+                    <h3>Panadería Desesperanza 💀</h3>
+                    <p>¡Gracias por su compra!</p>
+                </div>
+                <div class="ticket-info">
+                    <p><strong>Folio:</strong> <span id="ticket-folio">Loading...</span></p>
+                    <p><strong>Fecha:</strong> <span id="ticket-fecha">Loading...</span></p>
+                </div>
+                <div class="ticket-items" id="ticket-items-lista">
+                    </div>
+                <div class="ticket-total">
+                    TOTAL: $<span id="ticket-total-valor">0.00</span>
+                </div>
+            </div>
+            
+            <button onclick="imprimirTicket()" class="btn-imprimir">🖨️ Imprimir / Guardar PDF</button>
+            <button onclick="cerrarModalTicket()" class="btn-cerrar-modal" style="background: white; padding: 10px; border-radius: 5px;">Cerrar</button>
+        </div>
+    </div>
+
+    <script src="cartera.js"></script>
+
     <script>
         const carritoBody = document.getElementById('carrito-body');
         const carritoTotalEl = document.getElementById('carrito-total');
         const btnPedir = document.getElementById('btn-realizar-pedido');
         const btnVaciar = document.getElementById('btn-vaciar-carrito');
+        const modalTicket = document.getElementById('modal-ticket');
 
+        // --- MAPA LEAFLET ---
+        let map;
+        let marker;
+        const latInicial = 19.4326; 
+        const lngInicial = -99.1332;
+
+        function iniciarMapa() {
+            if (!document.getElementById('map')) return;
+            map = L.map('map').setView([latInicial, lngInicial], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19, attribution: '© OpenStreetMap'
+            }).addTo(map);
+            marker = L.marker([latInicial, lngInicial], {draggable: true}).addTo(map);
+            marker.on('dragend', function(e) { actualizarCoordenadas(e.target.getLatLng().lat, e.target.getLatLng().lng); });
+            map.on('click', function(e) { 
+                marker.setLatLng(e.latlng);
+                actualizarCoordenadas(e.latlng.lat, e.latlng.lng);
+            });
+            actualizarCoordenadas(latInicial, lngInicial);
+            setTimeout(() => { map.invalidateSize(); }, 100);
+        }
+
+        function actualizarCoordenadas(lat, lng) {
+            document.getElementById('latitud').value = lat;
+            document.getElementById('longitud').value = lng;
+        }
+
+        // --- CARRITO ---
         function renderizarTablaCarrito() {
             const carrito = obtenerCarrito(); 
-            
             carritoBody.innerHTML = '';
             let totalGeneral = 0;
 
@@ -68,103 +147,151 @@
             carrito.forEach((item, index) => {
                 const subtotal = item.precio * item.cantidad;
                 totalGeneral += subtotal;
-
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${item.nombre}</td>
                     <td>$${item.precio.toFixed(2)}</td>
-                    <td>
-                        <input type="number" value="${item.cantidad}" min="1" data-index="${index}" class="input-cantidad">
-                    </td>
+                    <td><input type="number" value="${item.cantidad}" min="1" data-index="${index}" class="input-cantidad"></td>
                     <td>$${subtotal.toFixed(2)}</td>
-                    <td>
-                        <button class="btn-eliminar" data-index="${index}">Eliminar</button>
-                    </td>
+                    <td><button class="btn-eliminar" data-index="${index}">Eliminar</button></td>
                 `;
                 carritoBody.appendChild(tr);
             });
-
             carritoTotalEl.textContent = totalGeneral.toFixed(2);
             btnPedir.disabled = false;
         }
 
+        // Eventos Tabla
         carritoBody.addEventListener('click', (e) => {
             if (e.target.classList.contains('btn-eliminar')) {
-                const index = parseInt(e.target.dataset.index, 10);
-                eliminarItemDelCarrito(index); 
+                eliminarItemDelCarrito(parseInt(e.target.dataset.index, 10)); 
                 renderizarTablaCarrito();
             }
         });
-
         carritoBody.addEventListener('change', (e) => {
             if (e.target.classList.contains('input-cantidad')) {
-                const index = parseInt(e.target.dataset.index, 10);
-                const nuevaCantidad = parseInt(e.target.value, 10);
-                
-                actualizarCantidadItem(index, nuevaCantidad);
+                actualizarCantidadItem(parseInt(e.target.dataset.index, 10), parseInt(e.target.value, 10));
                 renderizarTablaCarrito();
             }
         });
-
         btnVaciar.addEventListener('click', () => {
-            if (confirm('¿Seguro que deseas vaciar el carrito?')) {
-                guardarCarrito([]); 
-                renderizarTablaCarrito();
-            }
+            if (confirm('¿Vaciar carrito?')) { guardarCarrito([]); renderizarTablaCarrito(); }
         });
 
-        btnPedir.addEventListener('click', async () => {
+        // --- LÓGICA DEL TICKET ---
+        function mostrarTicket(datosVenta, itemsCarrito) {
+            // Llenar datos
+            document.getElementById('ticket-folio').textContent = datosVenta.ticket_id;
             
+            // Fecha actual formateada
+            const ahora = new Date();
+            document.getElementById('ticket-fecha').textContent = ahora.toLocaleString();
+            
+            // Llenar items
+            const lista = document.getElementById('ticket-items-lista');
+            lista.innerHTML = '';
+            let totalCalc = 0;
+            
+            itemsCarrito.forEach(item => {
+                const sub = item.cantidad * item.precio;
+                totalCalc += sub;
+                const div = document.createElement('div');
+                div.className = 'ticket-item';
+                div.innerHTML = `
+                    <span>${item.cantidad} x ${item.nombre}</span>
+                    <span>$${sub.toFixed(2)}</span>
+                `;
+                lista.appendChild(div);
+            });
+
+            document.getElementById('ticket-total-valor').textContent = totalCalc.toFixed(2);
+
+            // Mostrar modal
+            modalTicket.style.display = 'flex';
+        }
+
+        function cerrarModalTicket() {
+            modalTicket.style.display = 'none';
+            // Al cerrar el ticket, vaciamos el carrito visualmente porque ya se compró
+            guardarCarrito([]);
+            renderizarTablaCarrito();
+            // Actualizamos saldo
+            if(window.actualizarSaldoUI) window.actualizarSaldoUI();
+        }
+
+        function imprimirTicket() {
+            // Truco para imprimir solo el contenido del ticket
+            const contenido = document.getElementById('area-impresion').innerHTML;
+            const ventana = window.open('', '', 'height=600,width=400');
+            ventana.document.write('<html><head><title>Ticket de Compra</title>');
+            // Importamos los estilos básicos para que se vea igual
+            ventana.document.write('<style>');
+            ventana.document.write('body { font-family: "Courier New", monospace; text-align: center; }');
+            ventana.document.write('.ticket-header { border-bottom: 2px dashed #000; margin-bottom: 10px; }');
+            ventana.document.write('.ticket-item { display: flex; justify-content: space-between; margin: 5px 0; }');
+            ventana.document.write('.ticket-total { border-top: 2px dashed #000; font-weight: bold; margin-top: 10px; text-align: right; }');
+            ventana.document.write('</style>');
+            ventana.document.write('</head><body>');
+            ventana.document.write(contenido);
+            ventana.document.write('</body></html>');
+            ventana.document.close();
+            ventana.focus();
+            ventana.print();
+        }
+
+        // --- REALIZAR PEDIDO ---
+        btnPedir.addEventListener('click', async () => {
             const carrito = obtenerCarrito();
-            if (carrito.length === 0) {
-                alert("Tu carrito está vacío.");
-                return;
-            }
+            if (carrito.length === 0) return alert("Carrito vacío");
 
             const totalPedido = parseFloat(carritoTotalEl.textContent);
-            
+            const lat = document.getElementById('latitud').value;
+            const lng = document.getElementById('longitud').value;
+
+            if(!lat || !lng) return alert("Selecciona ubicación en el mapa");
+
             const datosPedido = {
                 total_pedido: totalPedido,
-                estado_pedido: 'pendiente', 
-                detalle_items: carrito 
+                detalle_items: carrito,
+                latitud: lat, longitud: lng
             };
 
-            console.log("Enviando al backend:", JSON.stringify(datosPedido));
-            
             try {
                 const response = await fetch('/api/pedidos/crear', { 
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     credentials: 'include', 
                     body: JSON.stringify(datosPedido)
                 });
 
+                const resultado = await response.json();
+
                 if (response.ok) {
-                    const resultado = await response.json();
-                    alert('¡Pedido realizado con éxito! ID del pedido: ' + resultado.id_pedido);
-                    
-                    guardarCarrito([]);
-                    renderizarTablaCarrito();
+                    // ÉXITO: En lugar de alert, mostramos el ticket
+                    mostrarTicket(resultado, carrito);
+                    // Nota: No vaciamos el carrito aquí inmediatamente para poder leer los items
+                    // Se vacía al cerrar el modal (función cerrarModalTicket)
                 } else {
-                    const error = await response.json();
                     if (response.status === 401) {
-                        alert("Tu sesión ha expirado. Por favor, inicia sesión de nuevo.");
                         window.location.href = 'index.html';
+                    } else if (response.status === 402) {
+                        if(confirm("Fondos insuficientes. ¿Recargar?")) {
+                            if (typeof mostrarModalCartera === 'function') mostrarModalCartera(); 
+                        }
                     } else {
-                        alert('Error al realizar el pedido: ' + error.message);
+                        alert('Error: ' + resultado.message);
                     }
                 }
-
             } catch (error) {
-                console.error('Error de red o conexión:', error);
-                alert('No se pudo conectar con el servidor para realizar el pedido.');
+                console.error(error);
+                alert('Error de conexión');
             }
         });
 
-        document.addEventListener('DOMContentLoaded', renderizarTablaCarrito);
-
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarTablaCarrito();
+            iniciarMapa();
+        });
     </script>
 </body>
 </html>

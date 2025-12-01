@@ -13,6 +13,91 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutButton = document.getElementById('logout-btn'); 
 
     let productos = [];
+    const cargarGrafica = async () => {
+        try {
+            const res = await fetch('/api/admin/estadisticas', { credentials: 'include' });
+            if (!res.ok) return;
+            
+            const datos = await res.json();
+            
+            if (datos.length === 0) return;
+
+            const etiquetas = datos.map(d => d.nombre);
+            const valores = datos.map(d => d.total_vendido);
+            
+            const coloresFondo = [
+                '#4a2c2a', // Café oscuro
+                '#a1662f', // Café medio
+                '#ff6d00', // Naranja temporada
+                '#e0dace', // Crema
+                '#8d6e63'  // Café claro
+            ];
+
+            const ctx = document.getElementById('graficaVentas').getContext('2d');
+
+            if (window.miGrafica) {
+                window.miGrafica.destroy();
+            }
+
+            window.miGrafica = new Chart(ctx, {
+                type: 'pie', 
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Unidades Vendidas',
+                        data: valores,
+                        backgroundColor: coloresFondo,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Poppins', sans-serif"
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Error cargando gráfica:', error);
+        }
+    };
+    const cargarHistorialVentas = async () => {
+            try {
+                const res = await fetch('/api/admin/historial', { credentials: 'include' });
+                if (res.ok) {
+                    const ventas = await res.json();
+                    const tbody = document.getElementById('tabla-ventas-body');
+                    tbody.innerHTML = '';
+                    
+                    ventas.forEach(v => {
+                        const tr = document.createElement('tr');
+                        // Formato de fecha legible
+                        const fecha = new Date(v.fecha_pedido).toLocaleDateString() + ' ' + new Date(v.fecha_pedido).toLocaleTimeString();
+                        
+                        tr.innerHTML = `
+                            <td style="font-family: monospace; font-weight: bold;">${v.numero_venta}</td>
+                            <td>${fecha}</td>
+                            <td>${v.nombre_cliente} ${v.apellido_cliente}</td>
+                            <td>$${parseFloat(v.total_pedido).toFixed(2)}</td>
+                            <td><span style="padding: 4px 8px; border-radius: 4px; background: #d4edda; color: #155724;">${v.estado_pedido}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando ventas:', error);
+            }
+    };
 
     const cargarProductos = async () => {
         try {
@@ -28,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tablabody.innerHTML = '';
             productos.forEach(p => {
-                // ¡IMPORTANTE! Esto oculta los productos desactivados ("eliminados")
                 if (p.esta_activo !== 0) { 
                     const fila = document.createElement('tr');
                     fila.innerHTML = `
@@ -79,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         return res.json(); 
                     })
                     .then(data => {
-                        console.log(data.message); // Muestra "Producto desactivado exitosamente"
-                        cargarProductos(); // Recarga la tabla
+                        console.log(data.message); 
+                        cargarProductos(); 
                     })
                     .catch(error => console.error(error));
             }
@@ -94,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const nombre = nombreInput.value;
         const precio = parseFloat(precioInput.value);
 
-        // --- Validación de Formulario (Cliente) ---
         if (!nombre.trim()) {
             alert('El nombre del producto no puede estar vacío.');
             return;
@@ -103,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('El precio debe ser un número positivo válido.');
             return;
         }
-        // --- Fin Validación ---
 
         const esActualizacion = id !== '';
         const url = esActualizacion ? `${API_URL}/${id}` : API_URL;
@@ -163,7 +245,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data.loggedIn || data.rol !== 'admin') { 
                 window.location.href = 'index.html'; 
             } else {
-                cargarProductos(); 
+                cargarProductos();
+                cargarGrafica(); 
+                cargarHistorialVentas();
             }
         } catch (error) {
             console.error('Error verificando autenticación:', error);

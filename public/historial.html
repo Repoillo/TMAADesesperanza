@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Pedidos - Desesperanza</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://png.pngtree.com/png-vector/20240806/ourmid/pngtree-branding-with-warmth-bread-loaf-logos-for-your-bakery-png-image_13393835.png" type="image/png">
+</head>
+<body>
+    <header>
+        <h1>Mis Pedidos 🧾</h1>
+    </header>
+
+    <div class="acciones-header">
+        <a href="principal.html" class="btn-carrito-header" style="background-color: var(--cafe-oscuro);">⬅ Volver a Tienda</a>
+    </div>
+
+    <main class="contenedor">
+        <h2 style="text-align: center; color: var(--cafe-oscuro);">Historial de Compras</h2>
+        <p style="text-align: center; font-size: 0.9em; margin-bottom: 20px;">Haz clic en un pedido para ver su ticket.</p>
+        
+        <div class="scroll-container">
+            <div id="lista-pedidos" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="text-align: center;">Cargando historial...</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal-ticket" class="modal-overlay">
+        <div class="modal-content" style="background: transparent; box-shadow: none;">
+            <div id="area-impresion" class="ticket-contenido">
+                <div class="ticket-header">
+                    <h3>Panadería Desesperanza 💀</h3>
+                    <p>Copia de Recibo</p>
+                </div>
+                <div class="ticket-info">
+                    <p><strong>Folio:</strong> <span id="ticket-folio">Loading...</span></p>
+                    <p><strong>Fecha:</strong> <span id="ticket-fecha">Loading...</span></p>
+                </div>
+                <div class="ticket-items" id="ticket-items-lista">
+                    </div>
+                <div class="ticket-total">
+                    TOTAL: $<span id="ticket-total-valor">0.00</span>
+                </div>
+            </div>
+            
+            <button onclick="imprimirTicket()" class="btn-imprimir">🖨️ Imprimir / PDF</button>
+            <button onclick="document.getElementById('modal-ticket').style.display='none'" class="btn-cerrar-modal" style="background: white; padding: 10px; border-radius: 5px;">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const contenedor = document.getElementById('lista-pedidos');
+            try {
+                const res = await fetch('/api/mis-pedidos', { credentials: 'include' });
+                
+                if (res.status === 401) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const pedidos = await res.json();
+                contenedor.innerHTML = '';
+
+                if (pedidos.length === 0) {
+                    contenedor.innerHTML = '<p style="text-align:center; padding: 20px;">Aún no has realizado ninguna compra.</p>';
+                    return;
+                }
+
+                pedidos.forEach(p => {
+                    const fecha = new Date(p.fecha_pedido).toLocaleString();
+                    const card = document.createElement('div');
+                    card.className = 'tarjeta-pedido'; // Clase para efecto hover
+                    // Estilos base
+                    card.style = "background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;";
+                    
+                    // Evento Click para abrir detalles
+                    card.onclick = () => cargarDetallePedido(p.id_pedido);
+
+                    card.innerHTML = `
+                        <div>
+                            <h3 style="margin: 0 0 5px 0; color: var(--cafe-oscuro);">📄 Folio: ${p.folio}</h3>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">${fecha}</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.2rem; font-weight: bold; color: var(--naranja-temporada); margin: 0;">$${parseFloat(p.total_pedido).toFixed(2)}</p>
+                            <span style="font-size: 0.8rem; background: #eee; padding: 3px 8px; border-radius: 10px;">${p.estado_pedido}</span>
+                        </div>
+                    `;
+                    contenedor.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error(error);
+                contenedor.innerHTML = '<p style="color: red; text-align: center;">Error al cargar historial.</p>';
+            }
+        });
+
+        // Función para traer los detalles y abrir el modal
+        async function cargarDetallePedido(id) {
+            try {
+                const res = await fetch(`/api/pedidos/${id}`, { credentials: 'include' });
+                if (!res.ok) throw new Error('Error cargando detalles');
+                const datos = await res.json();
+                mostrarTicket(datos);
+            } catch (error) {
+                alert("No se pudo cargar el ticket.");
+                console.error(error);
+            }
+        }
+
+        function mostrarTicket(datos) {
+            document.getElementById('ticket-folio').textContent = datos.ticket_id;
+            document.getElementById('ticket-fecha').textContent = new Date(datos.fecha).toLocaleString();
+            document.getElementById('ticket-total-valor').textContent = parseFloat(datos.total).toFixed(2);
+            
+            const lista = document.getElementById('ticket-items-lista');
+            lista.innerHTML = '';
+            
+            datos.items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'ticket-item';
+                div.innerHTML = `
+                    <span>${item.cantidad} x ${item.nombre}</span>
+                    <span>$${(item.cantidad * item.precio_unitario).toFixed(2)}</span>
+                `;
+                lista.appendChild(div);
+            });
+
+            document.getElementById('modal-ticket').style.display = 'flex';
+        }
+
+        function imprimirTicket() {
+            const contenido = document.getElementById('area-impresion').innerHTML;
+            const ventana = window.open('', '', 'height=600,width=400');
+            ventana.document.write('<html><head><title>Ticket</title>');
+            ventana.document.write('<style>body { font-family: "Courier New", monospace; text-align: center; } .ticket-header { border-bottom: 2px dashed #000; margin-bottom: 10px; } .ticket-item { display: flex; justify-content: space-between; margin: 5px 0; } .ticket-total { border-top: 2px dashed #000; font-weight: bold; margin-top: 10px; text-align: right; }</style>');
+            ventana.document.write('</head><body>');
+            ventana.document.write(contenido);
+            ventana.document.write('</body></html>');
+            ventana.document.close();
+            ventana.focus();
+            ventana.print();
+        }
+    </script>
+</body>
+</html>

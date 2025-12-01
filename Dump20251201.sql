@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
 -- Host: localhost    Database: panaderia
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.44
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -27,9 +27,11 @@ CREATE TABLE `clientes` (
   `nombre` varchar(100) NOT NULL,
   `apellido` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `saldo` decimal(15,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id_cliente`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `email` (`email`),
+  CONSTRAINT `check_saldo_positivo` CHECK ((`saldo` >= 0))
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +40,7 @@ CREATE TABLE `clientes` (
 
 LOCK TABLES `clientes` WRITE;
 /*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
-INSERT INTO `clientes` VALUES (1,'Admin','User','hola@gmail.com'),(2,'Angel','User','angel@gmail.com'),(3,'pepe','casas','pepe@gmail.com');
+INSERT INTO `clientes` VALUES (1,'Admin','User','hola@gmail.com',0.00),(2,'Angel','User','angel@gmail.com',0.00),(3,'pepe','casas','pepe@gmail.com',0.00),(5,'Angel','Nose','angelnose@gmail.com',11.75),(6,'no','jaja','no@gmail.com',72.25);
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -60,7 +62,7 @@ CREATE TABLE `detalle_pedidos` (
   KEY `id_producto` (`id_producto`),
   CONSTRAINT `detalle_pedidos_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id_pedido`) ON DELETE CASCADE,
   CONSTRAINT `detalle_pedidos_ibfk_2` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -69,7 +71,7 @@ CREATE TABLE `detalle_pedidos` (
 
 LOCK TABLES `detalle_pedidos` WRITE;
 /*!40000 ALTER TABLE `detalle_pedidos` DISABLE KEYS */;
-INSERT INTO `detalle_pedidos` VALUES (1,3,1,2,25.50),(2,3,3,1,30.00),(3,3,4,1,2.25),(4,4,3,1,30.00),(5,4,4,3,2.25),(6,5,2,1,25.00),(7,5,1,3,25.50),(8,6,5,2,20.00);
+INSERT INTO `detalle_pedidos` VALUES (1,3,1,2,25.50),(2,3,3,1,30.00),(3,3,4,1,2.25),(4,4,3,1,30.00),(5,4,4,3,2.25),(6,5,2,1,25.00),(7,5,1,3,25.50),(8,6,5,2,20.00),(9,7,3,1,30.00),(10,7,4,1,2.25),(11,8,4,2,2.25),(12,9,1,7,25.50),(13,9,3,3,30.00),(14,9,4,9,2.25),(15,9,5,5,20.00),(16,9,2,1,25.00),(17,10,7,5,175.00),(18,11,3,6,30.00),(19,12,4,1,2.25),(20,12,1,1,25.50),(21,13,5,1,20.00),(22,13,2,1,25.00),(23,14,7,1,175.00);
 /*!40000 ALTER TABLE `detalle_pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -142,10 +144,12 @@ CREATE TABLE `pedidos` (
   `fecha_pedido` datetime DEFAULT CURRENT_TIMESTAMP,
   `total_pedido` decimal(10,2) NOT NULL,
   `estado_pedido` enum('pendiente','en_preparacion','listo_para_recoger','entregado','cancelado') NOT NULL,
+  `latitud` decimal(10,8) DEFAULT NULL,
+  `longitud` decimal(11,8) DEFAULT NULL,
   PRIMARY KEY (`id_pedido`),
   KEY `id_cliente` (`id_cliente`),
   CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -154,7 +158,7 @@ CREATE TABLE `pedidos` (
 
 LOCK TABLES `pedidos` WRITE;
 /*!40000 ALTER TABLE `pedidos` DISABLE KEYS */;
-INSERT INTO `pedidos` VALUES (3,1,'2025-11-04 08:24:58',83.25,'pendiente'),(4,3,'2025-11-04 08:39:16',36.75,'pendiente'),(5,3,'2025-11-04 08:43:30',101.50,'pendiente'),(6,3,'2025-11-04 08:58:58',40.00,'pendiente');
+INSERT INTO `pedidos` VALUES (3,1,'2025-11-04 08:24:58',83.25,'pendiente',NULL,NULL),(4,3,'2025-11-04 08:39:16',36.75,'pendiente',NULL,NULL),(5,3,'2025-11-04 08:43:30',101.50,'pendiente',NULL,NULL),(6,3,'2025-11-04 08:58:58',40.00,'pendiente',NULL,NULL),(7,5,'2025-12-01 11:07:35',32.25,'pendiente',19.43260000,-99.13320000),(8,5,'2025-12-01 11:18:05',4.50,'pendiente',19.44698462,-99.12878036),(9,5,'2025-12-01 11:26:04',413.75,'pendiente',19.42950192,-99.13478851),(10,5,'2025-12-01 11:45:09',875.00,'pendiente',19.45216431,-99.14749146),(11,6,'2025-12-01 11:46:04',180.00,'pendiente',19.43260000,-99.13320000),(12,6,'2025-12-01 11:46:13',27.75,'pendiente',19.43260000,-99.13320000),(13,6,'2025-12-01 11:46:20',45.00,'pendiente',19.43260000,-99.13320000),(14,6,'2025-12-01 11:46:28',175.00,'pendiente',19.43260000,-99.13320000);
 /*!40000 ALTER TABLE `pedidos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -171,9 +175,10 @@ CREATE TABLE `productos` (
   `precio_venta` decimal(10,2) NOT NULL,
   `imagen_url` varchar(255) DEFAULT NULL,
   `es_de_temporada` tinyint(1) NOT NULL DEFAULT '0',
+  `esta_activo` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id_producto`),
   UNIQUE KEY `nombre` (`nombre`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -182,7 +187,7 @@ CREATE TABLE `productos` (
 
 LOCK TABLES `productos` WRITE;
 /*!40000 ALTER TABLE `productos` DISABLE KEYS */;
-INSERT INTO `productos` VALUES (1,'Croissant de Almendras',25.50,'https://ketology.mx/cdn/shop/files/croissant_1e388d23-aab1-4793-a0c9-670de31816ca.png?v=1726788469',0),(2,'PAN DE MUERTO ?????',25.00,'https://revistasociosams.com/wp-content/uploads/2021/08/pan-de-muerto-vista-arriba.png',1),(3,'Pan al vapor',30.00,'https://png.pngtree.com/png-clipart/20250501/original/pngtree-steamed-bun-cut-in-half-showing-filling-png-image_20924527.png',0),(4,'bolillo',2.25,'https://champlitte.com.mx/imgProd/s3XGYvl1R43550ae5ffd5f1d9aaf5ac145b14ef28%20(2).webp',0),(5,'vuala',20.00,'https://dulcerialaestrella.com.mx/cdn/shop/files/IMG25_0058_1200x.png?v=1761411589',0);
+INSERT INTO `productos` VALUES (1,'Croissant de Almendras',25.50,'https://ketology.mx/cdn/shop/files/croissant_1e388d23-aab1-4793-a0c9-670de31816ca.png?v=1726788469',0,1),(2,'PAN DE MUERTO ?????',25.00,'https://revistasociosams.com/wp-content/uploads/2021/08/pan-de-muerto-vista-arriba.png',1,1),(3,'Pan al vapor',30.00,'https://png.pngtree.com/png-clipart/20250501/original/pngtree-steamed-bun-cut-in-half-showing-filling-png-image_20924527.png',0,1),(4,'bolillo',2.25,'https://champlitte.com.mx/imgProd/s3XGYvl1R43550ae5ffd5f1d9aaf5ac145b14ef28%20(2).webp',0,1),(5,'vuala',20.00,'https://dulcerialaestrella.com.mx/cdn/shop/files/IMG25_0058_1200x.png?v=1761411589',0,1),(7,'Rosca de Reyes',175.00,'https://tofuu.getjusto.com/orioneat-local/resized2/yYbDbBRTCGjTexpkE-300-x.webp',1,1);
 /*!40000 ALTER TABLE `productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,7 +233,7 @@ CREATE TABLE `usuario` (
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `id_usuario` (`id_usuario`),
   UNIQUE KEY `correo` (`correo`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,7 +242,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'hola@gmail.com','$2b$10$.WvcgcZXcrrVsNliBIR5MOUpd7LW9RoZXF/D.oS9Y85UczICAomWe','admin'),(2,'angel@gmail.com','$2b$10$6pKQZhkssk/woPyvP20VwuQte0PtmXUpajHSu8Cid84Kzw3.fEHgu','cliente'),(3,'pepe@gmail.com','$2b$10$tjr9JbIBkeunNr4UN6FhIeiZFZthUN8iUkBv4vWP/tPvH8S8vH0pG','cliente');
+INSERT INTO `usuario` VALUES (1,'hola@gmail.com','$2b$10$.WvcgcZXcrrVsNliBIR5MOUpd7LW9RoZXF/D.oS9Y85UczICAomWe','admin'),(2,'angel@gmail.com','$2b$10$6pKQZhkssk/woPyvP20VwuQte0PtmXUpajHSu8Cid84Kzw3.fEHgu','cliente'),(3,'pepe@gmail.com','$2b$10$tjr9JbIBkeunNr4UN6FhIeiZFZthUN8iUkBv4vWP/tPvH8S8vH0pG','cliente'),(5,'angelnose@gmail.com','$2b$10$nMz/NBRm5m3xJLobsi6sbuN3YlADD07DXq3q5Wdxml/5pIUfReqc6','cliente'),(6,'no@gmail.com','$2b$10$B6v/nvfHqKbZrmjSTHH49uT6mjea5aTiGguB8XjhH1HiW5BQ3S5E.','cliente');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -258,4 +263,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-04 10:21:26
+-- Dump completed on 2025-12-01 11:48:27
